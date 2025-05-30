@@ -4,9 +4,11 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { firestore, auth } from "../utils/config";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { AuthResponseConfig, UserDataInterface } from "../interfaces";
 import { print } from "../utils/logger";
+import { generateUsername } from "unique-username-generator";
+import { FirebaseError } from "firebase/app";
 
 const authRouter = Router();
 
@@ -24,10 +26,10 @@ authRouter.post(
         return;
       }
 
-      const userCred = (await signInWithEmailAndPassword(auth, email, password))
-        .user;
+      const uid = (await signInWithEmailAndPassword(auth, email, password)).user
+        .uid;
 
-      if (!userCred) {
+      if (!uid) {
         res.json({
           message: "account not found",
           status: 300,
@@ -36,25 +38,65 @@ authRouter.post(
         return;
       }
 
-      const docRef = doc(firestore, "users", userCred.uid);
+      const docRef = doc(firestore, "users", uid);
 
       const userData = (await getDoc(docRef)).data() as UserDataInterface;
+
+      print(userData);
+
       res.json({ message: "logged in", status: 300, credentials: userData });
     } catch (err) {
+      if (err instanceof FirebaseError) {
+        res.json({ message: err.code, status: 300, credentials: null });
+        return;
+      }
+
       res.json({ message: err as string, status: 300, credentials: null });
     }
   }
 );
 
-authRouter.post("/register", (req: Request, res: Response) => {
-  const { email, password } = req.body;
+authRouter.post(
+  "/register",
+  async (req: Request, res: Response<AuthResponseConfig>) => {
+    try {
+      const { email, password } = req.body;
 
-  if (!email || !password) {
-    res.json({ message: "fields missing", status: 300 });
-    print(req.body, "fields missing");
-    return;
+      if (!email || !password) {
+        res.json({ message: "fields missing", status: 300, credentials: null });
+        print(req.body, "fields missing");
+        return;
+      }
+
+      const uid = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      ).then((user) => user.user.uid);
+
+      const userData: UserDataInterface = {
+        email,
+        created_at: new Date().getTime(),
+        display_name: generateUsername("-", 5),
+        uid: uid,
+      };
+
+      await setDoc(doc(firestore, "users", uid), userData);
+
+      print(userData);
+      res.json({ message: "logged in", status: 300, credentials: userData });
+    } catch (err) {
+      console.log(err);
+
+      if (err instanceof FirebaseError) {
+        res.json({ message: err.code, status: 300, credentials: null });
+        return;
+      }
+
+      res.json({ message: err as string, status: 300, credentials: null });
+    }
   }
-});
+);
 
 //authRouter.post("/forget_password");
 
