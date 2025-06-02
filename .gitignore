@@ -1,4 +1,4 @@
 node_modules/
 
 
-src/utils/config.ts
+.env
