@@ -17,6 +17,8 @@ authRouter.post(
   async (req: Request, res: Response<AuthResponseConfig>) => {
     const { email, password } = req.body;
 
+    print("requested login")
+
     try {
       if (!email || !password) {
         res.json({ message: "fields missing", status: 300, credentials: null });
@@ -44,7 +46,7 @@ authRouter.post(
 
       print(userData);
 
-      res.json({ message: "logged in", status: 300, credentials: userData });
+      res.json({ message: "logged in", status: 200, credentials: userData });
     } catch (err) {
       if (err instanceof FirebaseError) {
         res.json({ message: err.code, status: 300, credentials: null });
@@ -84,7 +86,7 @@ authRouter.post(
       await setDoc(doc(firestore, "users", uid), userData);
 
       print(userData);
-      res.json({ message: "logged in", status: 300, credentials: userData });
+      res.json({ message: "logged in", status: 200, credentials: userData });
     } catch (err) {
       console.log(err);
 
@@ -101,3 +103,5 @@ authRouter.post(
 //authRouter.post("/forget_password");
 
 export default authRouter;
+
+

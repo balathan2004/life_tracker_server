@@ -19,7 +19,7 @@ export interface UserDataInterface {
 }
 
 export interface dailyLogInterface {
-  date: string; // e.g. "2025-05-22"
+  date: number; // e.g. "2025-05-22"
   wakeUpTime: number;
   sleepTime: number;
 
@@ -43,27 +43,19 @@ export interface dailyLogInterface {
   notes?: string;
 }
 
-export const initDailyLog = () => {
-  const data: dailyLogInterface = {
-    date: "",
-    wakeUpTime: 0,
-    sleepTime: 0,
-    meals: {
-      breakfast: "",
-      lunch: "",
-      dinner: "",
-      snacks: "",
-    },
-    workout: "",
-    bodyMeasurements: {
-      height: 0,
-      weight: 0,
-    },
-    screenTimeMinutes: 0,
-    somethingProductive: "",
-    isBathTaken: false,
-    travel: "",
-    notes: "",
-  };
-  return data;
-};
+export interface ResponseConfig {
+  status: 200 | 300;
+  message: string;
+}
+
+export interface QuoteResponseConfig {
+  quote: string;
+}
+
+export interface UserDataInterface {
+  display_name: string;
+  uid: string;
+  created_at: number;
+}
+
+export type foods = "breakfast" | "lunch" | "dinner" | "snacks";
