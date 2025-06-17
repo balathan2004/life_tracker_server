@@ -1,4 +1,11 @@
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  arrayUnion,
+  deleteField,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { firestore } from "../utils/config";
 import { Router, Request, Response } from "express";
 import { print } from "../utils/logger";
@@ -42,7 +49,7 @@ apiRoute.post("/update_doc", async (req: Request, res: Response) => {
   }
 });
 
-apiRoute.post("/get_docs", async (req: Request, res: Response) => {
+apiRoute.get("/get_docs", async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string;
 
@@ -56,7 +63,7 @@ apiRoute.post("/get_docs", async (req: Request, res: Response) => {
 
     const fetchDoc = (await getDoc(docRef)).data()?.logs as {
       [date: string]: dailyLogInterface;
-    }[];
+    };
 
     res.json({ status: 200, message: "success", docs: fetchDoc });
   } catch (err) {
@@ -64,5 +71,33 @@ apiRoute.post("/get_docs", async (req: Request, res: Response) => {
     res.json({ status: 300, message: JSON.stringify(err) });
   }
 });
+
+apiRoute.get(
+  "/delete_doc",
+  async (req: Request, res: Response<ResponseConfig>) => {
+    try {
+      const user_id = req.query.user_id as string;
+      const doc_id = req.query.doc_id as string;
+
+      print("doc delete req from ", user_id);
+
+      if (!user_id || !doc_id) {
+        res.json({ status: 200, message: "Missing user_id or doc_id" });
+        return;
+      }
+
+      const docRef = doc(firestore, "docs", user_id);
+
+      await updateDoc(docRef, {
+        [`logs.${doc_id}`]: deleteField(),
+      });
+
+      res.json({ status: 200, message: "success" });
+    } catch (err) {
+      print(err);
+      res.json({ status: 300, message: JSON.stringify(err) });
+    }
+  }
+);
 
 export default apiRoute;
