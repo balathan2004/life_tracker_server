@@ -7,11 +7,8 @@ import cors from "cors";
 import apiRoute from "./routes/api";
 import authRouter from "./routes/auth";
 import jwt from "jsonwebtoken";
-import { dailyLogInterface, JwtRequest } from "./interfaces";
-import { firestore } from "./utils/config";
-import { doc, setDoc } from "firebase/firestore";
+import {  JwtRequest } from "./interfaces";
 
-const data: Record<string, dailyLogInterface> = require("../text.json");
 
 const app = express();
 
