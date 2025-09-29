@@ -6,14 +6,23 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import apiRoute from "./routes/api";
 import authRouter from "./routes/auth";
+import jwt from "jsonwebtoken";
+import { dailyLogInterface, JwtRequest } from "./interfaces";
+import { firestore } from "./utils/config";
+import { doc, setDoc } from "firebase/firestore";
+
+const data: Record<string, dailyLogInterface> = require("../text.json");
 
 const app = express();
 
 const port = process.env.PORT || 3000;
 
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:8080", "http://localhost:8081"],
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -31,13 +40,41 @@ app.get("/", (req: Request, res: Response) => {
 `);
 });
 
-app.use("/api", apiRoute);
+export function verifyToken(
+  token: string,
+  req: JwtRequest,
+  res: Response,
+  next: any
+) {
+  jwt.verify(token, JWT_ACCESS_SECRET || "", (err, user: any) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: "Auth Token Not found",
+      });
+    } else {
+      req.jwt = user as any;
+
+      next();
+    }
+    return;
+  });
+}
+
+async function authenticateToken(req: Request, res: Response, next: any) {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.split(" ")[1];
+  verifyToken(token, req, res, next);
+}
+
+app.use("/api", authenticateToken, apiRoute);
 
 app.use("/auth", authRouter);
 
 app.get("/test", (req: Request, res: Response) => {
   res.json({ message: "test route", status: 200 });
 });
+
 
 app.listen(port, () => {
   print("server listening");

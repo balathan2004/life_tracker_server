@@ -1,6 +1,10 @@
+import { Request } from "express";
 export interface ResponseConfig {
-  status: 200 | 300;
   message: string;
+}
+
+export interface JwtRequest extends Request{
+  jwt?:UserDataInterface
 }
 
 export interface QuoteResponseConfig {
@@ -9,6 +13,8 @@ export interface QuoteResponseConfig {
 
 export interface AuthResponseConfig extends ResponseConfig {
   credentials: UserDataInterface | null;
+  accessToken?:string
+  refreshToken?:string
 }
 
 export interface UserDataInterface {
@@ -19,7 +25,7 @@ export interface UserDataInterface {
 }
 
 export interface dailyLogInterface {
-  date: number; // e.g. "2025-05-22"
+  date: string; // e.g. "2025-05-22"
   wakeUpTime: number;
   sleepTime: number;
 
@@ -43,10 +49,7 @@ export interface dailyLogInterface {
   notes?: string;
 }
 
-export interface ResponseConfig {
-  status: 200 | 300;
-  message: string;
-}
+
 
 export interface QuoteResponseConfig {
   quote: string;

@@ -1,47 +1,40 @@
 import {
-  arrayUnion,
+  collection,
   deleteField,
   doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
   setDoc,
-  updateDoc,
 } from "firebase/firestore";
 import { firestore } from "../utils/config";
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import { print } from "../utils/logger";
-import { dailyLogInterface, ResponseConfig } from "../interfaces";
+import { JwtRequest } from "../interfaces";
 
 const apiRoute = Router();
 
-apiRoute.post("/update_doc", async (req: Request, res: Response) => {
+apiRoute.post("/update_doc", async (req: JwtRequest, res: Response) => {
   try {
-    const { uid, data } = req.body;
+    console.log("accessed");
+    const jwt = req.jwt;
 
-    print("doc update from ", uid);
+    const { data } = req.body;
+    console.log({ data });
 
-    if (!uid || !data) {
-      res.json({ status: 300, message: "fields missing" });
+    if (!jwt || !data) {
+      res.status(300).json({ message: "unauthorised", docs: [] });
       return;
     }
 
-    const docRef = doc(firestore, "docs", uid);
+    const docRef = doc(firestore, "userlogs", jwt.uid, "logs", data.date);
 
-    const fetchDoc = await getDoc(docRef);
-
-    if (!fetchDoc.exists()) {
-      await setDoc(docRef, { logs: { [data.date]: data } });
-      return;
-    }
-
-    await setDoc(
-      docRef,
-      {
-        logs: {
-          [data.date]: data,
-        },
-      },
-      { merge: true }
-    );
+    await setDoc(docRef, {...data}, { merge: true })
+      .then((res) => {
+        console.log({ res });
+      })
+      .catch((err) => print(err));
     res.json({ status: 200, message: "success" });
   } catch (err) {
     print(err);
@@ -49,55 +42,59 @@ apiRoute.post("/update_doc", async (req: Request, res: Response) => {
   }
 });
 
-apiRoute.get("/get_docs", async (req: Request, res: Response) => {
+apiRoute.get("/get_docs", async (req: JwtRequest, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const jwt = req.jwt;
 
-    print("doc fetch from ", userId);
+    console.log({ jwt });
 
-    if (!userId) {
+    if (!jwt) {
+      res.status(300).json({ message: "unauthorised", docs: [] });
       return;
     }
 
-    const docRef = doc(firestore, "docs", userId);
+    const collectionRef = collection(firestore, "userlogs", jwt.uid, "logs");
 
-    const fetchDoc = (await getDoc(docRef)).data()?.logs as {
-      [date: string]: dailyLogInterface;
-    };
+    const queryForDocs = query(collectionRef, orderBy("date", "desc"));
 
-    res.json({ status: 200, message: "success", docs: fetchDoc });
+    const fetchDoc = (await getDocs(queryForDocs)).docs.map((doc) =>
+      doc.data()
+    );
+
+    res.status(200).json({ message: "success", docs: fetchDoc });
   } catch (err) {
     print(err);
-    res.json({ status: 300, message: JSON.stringify(err) });
+    res.status(300).json({ message: JSON.stringify(err) });
   }
 });
 
-apiRoute.get(
-  "/delete_doc",
-  async (req: Request, res: Response<ResponseConfig>) => {
-    try {
-      const user_id = req.query.user_id as string;
-      const doc_id = req.query.doc_id as string;
+// apiRoute.get(
+//   "/delete_doc",
+//   async (req: JwtRequest, res: Response<ResponseConfig>) => {
+//     try {
 
-      print("doc delete req from ", user_id);
+//       const user_id = req.query.user_id as string;
+//       const doc_id = req.query.doc_id as string;
 
-      if (!user_id || !doc_id) {
-        res.json({ status: 200, message: "Missing user_id or doc_id" });
-        return;
-      }
+//       print("doc delete req from ", user_id);
 
-      const docRef = doc(firestore, "docs", user_id);
+//       if (!user_id || !doc_id) {
+//         res.status(300).json({ message: "Missing user_id or doc_id" });
+//         return;
+//       }
 
-      await updateDoc(docRef, {
-        [`logs.${doc_id}`]: deleteField(),
-      });
+//       const docRef = doc(firestore, "docs", user_id);
 
-      res.json({ status: 200, message: "success" });
-    } catch (err) {
-      print(err);
-      res.json({ status: 300, message: JSON.stringify(err) });
-    }
-  }
-);
+//       await updateDoc(docRef, {
+//         [`logs.${doc_id}`]: deleteField(),
+//       });
+
+//       res.status(200).json({ message: "success" });
+//     } catch (err) {
+//       print(err);
+//       res.status(300).json({ message: JSON.stringify(err) });
+//     }
+//   }
+// );
 
 export default apiRoute;
