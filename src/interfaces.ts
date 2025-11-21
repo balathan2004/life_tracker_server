@@ -3,8 +3,8 @@ export interface ResponseConfig {
   message: string;
 }
 
-export interface JwtRequest extends Request{
-  jwt?:UserDataInterface
+export interface JwtRequest extends Request {
+  jwt?: UserDataInterface;
 }
 
 export interface QuoteResponseConfig {
@@ -13,8 +13,16 @@ export interface QuoteResponseConfig {
 
 export interface AuthResponseConfig extends ResponseConfig {
   credentials: UserDataInterface | null;
-  accessToken?:string
-  refreshToken?:string
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+export interface LogsResponseConfig extends ResponseConfig {
+  data: dailyLogInterface[];
+}
+
+export interface SingleLogResponseConfig extends ResponseConfig {
+  data: dailyLogInterface | null;
 }
 
 export interface UserDataInterface {
@@ -36,20 +44,19 @@ export interface dailyLogInterface {
     snacks: string;
   };
 
-  workout?: string;
-  bodyMeasurements?: {
-    height: number;
-    weight: number;
+  workout: string;
+  bodyMeasurements: {
+    height: string;
+    weight: string;
   };
 
-  screenTimeMinutes?: number;
-  somethingProductive?: string;
+  screenTimeMinutes: number;
+  somethingProductive: string;
   isBathTaken: boolean;
-  travel?: string;
-  notes?: string;
+  travel: string;
+  notes: string;
+  encrypted?: boolean;
 }
-
-
 
 export interface QuoteResponseConfig {
   quote: string;

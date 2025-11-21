@@ -7,8 +7,7 @@ import cors from "cors";
 import apiRoute from "./routes/api";
 import authRouter from "./routes/auth";
 import jwt from "jsonwebtoken";
-import {  JwtRequest } from "./interfaces";
-
+import { JwtRequest } from "./interfaces";
 
 const app = express();
 
@@ -45,13 +44,13 @@ export function verifyToken(
 ) {
   jwt.verify(token, JWT_ACCESS_SECRET || "", (err, user: any) => {
     if (err) {
+      console.log({ err });
       return res.status(403).json({
         success: false,
         message: "Auth Token Not found",
       });
     } else {
       req.jwt = user as any;
-
       next();
     }
     return;
@@ -71,7 +70,6 @@ app.use("/auth", authRouter);
 app.get("/test", (req: Request, res: Response) => {
   res.json({ message: "test route", status: 200 });
 });
-
 
 app.listen(port, () => {
   print("server listening");
