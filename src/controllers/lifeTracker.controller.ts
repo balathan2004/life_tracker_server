@@ -3,18 +3,19 @@ import {
   DataResponseConfig,
   ResponseConfig,
   VerifiedJwtRequest,
-} from "../types/common";
+} from "../types/index";
 import { Response, Request } from "express";
 import { lifeTrackerService } from "../services/lifeTracker.services";
 import { AppError } from "../utils/appError";
-import { dailyLogInterface } from "../types/lifeTracker";
+import { dailyLogInterface } from "../types";
+
 
 export const LifeTrackerController = {
   async get(
     req: Request,
     res: Response<DataListResponseConfig<dailyLogInterface>>
   ) {
-    const { jwt } = req as VerifiedJwtRequest;
+    const { jwt } = req as unknown as VerifiedJwtRequest;
     const { uid } = jwt;
 
     const { cursor } = req.query as { cursor?: string };
@@ -28,7 +29,7 @@ export const LifeTrackerController = {
     req: Request,
     res: Response<DataResponseConfig<dailyLogInterface>>
   ) {
-    const { jwt } = req as VerifiedJwtRequest;
+       const { jwt } = req as unknown as VerifiedJwtRequest;
     const { uid } = jwt;
 
     const doc_id = req.params.id as string;
@@ -43,7 +44,7 @@ export const LifeTrackerController = {
   },
 
   async update(req: Request, res: Response<ResponseConfig>) {
-    const { jwt } = req as VerifiedJwtRequest;
+     const { jwt } = req as unknown as VerifiedJwtRequest;
     const { uid } = jwt;
     const doc_id = req.params.id as string;
     const log = req.body;
@@ -60,7 +61,7 @@ export const LifeTrackerController = {
     res.status(200).json({ message: "docs updated" });
   },
   async encrypt(req: Request, res: Response<ResponseConfig>) {
-    const { jwt } = req as VerifiedJwtRequest;
+     const { jwt } = req as unknown as VerifiedJwtRequest;
     const { uid } = jwt;
     const log = req.body;
 

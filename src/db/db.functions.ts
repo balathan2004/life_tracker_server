@@ -12,9 +12,9 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../utils/config";
 
-import { encryptedDoc } from "../types/common";
+import { encryptedDoc } from "../types/index";
 
-import { dailyLogInterface } from "../types/lifeTracker";
+import { dailyLogInterface } from "../types";
 
 export const collectionRefMaker = (uid: string) => {
   const collectionRef = collection(firestore, `mindspace/${uid}/thoughts`);

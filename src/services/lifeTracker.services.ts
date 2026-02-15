@@ -1,5 +1,5 @@
 import { collection, setDoc } from "firebase/firestore";
-import { dailyLogInterface } from "../types/lifeTracker";
+import { dailyLogInterface } from "../types";
 import { firestore } from "../utils/config";
 import { decryptTextParse, deriveKey, encryptText } from "../utils/encrypt";
 import { docGetter, docRefMaker, paginatedDocs } from "../db/db.functions";

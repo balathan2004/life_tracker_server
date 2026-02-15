@@ -1,4 +1,4 @@
-import { JwtRequest, UserDataInterface } from "../types/common";
+import { JwtRequest, User } from "../types/index";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -28,7 +28,7 @@ export function verifyToken(
 }
 
 export async function authenticateToken(
-  req: Request,
+  req: any,
   res: Response,
   next: any
 ) {
@@ -37,11 +37,11 @@ export async function authenticateToken(
   verifyToken(token, req, res, next);
 }
 
-export function generateAccessToken(user: UserDataInterface) {
+export function generateAccessToken(user: User) {
   return jwt.sign(user, JWT_ACCESS_SECRET, { expiresIn: "1D" });
 }
 
-export function generateRefreshToken(user: UserDataInterface) {
+export function generateRefreshToken(user: User) {
   return jwt.sign(user, JWT_REFRESH_SECRET, { expiresIn: "30D" });
 }
 

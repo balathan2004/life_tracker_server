@@ -4,9 +4,6 @@ import { print } from "./utils/logger";
 global.print = print;
 import express, { Request, Response } from "express";
 import cors from "cors";
-// import apiRoute from "./routes/api";
-// import authRouter from "./routes/auth";
-import mindSpaceRouter from "./routes/mindspace";
 import { authenticateToken } from "./jwt/jwt";
 import { errorHandler } from "./middlewares/errorHandler";
 import LifeTrackerRouter from "./routes/lifeTracker";
@@ -39,7 +36,6 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/auth", AuthApiRoute);
 app.use("/api", authenticateToken, LifeTrackerRouter);
-app.use("/mindspace", authenticateToken, mindSpaceRouter);
 
 app.get("/test", (req: Request, res: Response) => {
   res.json({ message: "test route", status: 200 });
