@@ -46,8 +46,6 @@ export const lifeTrackerService = {
 
     const encryptedData = encryptText({ ...data, encrypted: true }, encryptKey);
 
-   console.log({encryptedData}) 
-
     await setDoc(docRef, { data: encryptedData, encrypted: true });
     return data;
   },

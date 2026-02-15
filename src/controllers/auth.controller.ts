@@ -26,10 +26,6 @@ export const AuthConroller = {
   async refreshToken(req: Request, res: Response) {
     const refreshToken = (req.body.refreshToken as string) || "";
 
-    console.log({ refreshToken }, "token placed");
-
-    console.log(refreshToken);
-
     const data = await AuthServices.verifyUsingRefresh(refreshToken);
 
     res.status(200).json({
